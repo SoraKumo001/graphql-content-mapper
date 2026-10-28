@@ -1,0 +1,54 @@
+{
+  "name": "graphql-content-mapper",
+  "version": "1.0.0",
+  "description": "Zero-codegen GraphQL TypedDocumentNode and enum loader for TypeScript 7.1 Content Mappers, Vite, and Next.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./loader": {
+      "types": "./dist/loader.d.ts",
+      "default": "./dist/loader.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "default": "./dist/vite.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "default": "./dist/next.js"
+    },
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "default": "./dist/compiler.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "peerDependencies": {
+    "@graphql-codegen/cli": ">=5.0.0",
+    "@graphql-codegen/typescript": ">=4.0.0",
+    "@graphql-codegen/typescript-operations": ">=4.0.0",
+    "graphql": "^16.0.0 || ^17.0.0"
+  },
+  "typescript": {
+    "contentMapper": {
+      "exec": [
+        "node",
+        "dist/index.js"
+      ],
+      "outputExtensions": {
+        ".graphql": ".js",
+        ".gql": ".js"
+      }
+    }
+  }
+}
