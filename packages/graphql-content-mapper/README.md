@@ -117,11 +117,32 @@ const withGraphQL = require("graphql-content-mapper/next");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Your Next.js config
+  typescript: {
+    // Next.js internal type checker does not pass TypeScript 7.1's '--runExternalCode' flag.
+    // Run 'tsc --runExternalCode --noEmit' separately in your build script.
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = withGraphQL(nextConfig);
 ```
+
+> [!IMPORTANT]
+> **Next.js Production Build Requirement**:
+> TypeScript 7.1 requires the `--runExternalCode` flag to execute external Content Mapper processes. Because `next build`'s internal type check does not yet support this flag, it will fail with `TS18068`.
+>
+> To resolve this without sacrificing type safety:
+> 1. Add `typescript: { ignoreBuildErrors: true }` to `next.config.js`.
+> 2. Run `tsc --runExternalCode --noEmit` before `next build` in your `package.json`:
+>
+> ```json
+> {
+>   "scripts": {
+>     "typecheck": "tsc --runExternalCode --noEmit",
+>     "build": "npm run typecheck && next build"
+>   }
+> }
+> ```
 
 ---
 
