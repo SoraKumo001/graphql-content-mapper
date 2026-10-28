@@ -31,4 +31,10 @@ export default function graphqlContentMapperLoader(this: LoaderContext, source: 
 }
 
 // Support CommonJS require
-module.exports = graphqlContentMapperLoader;
+try {
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = graphqlContentMapperLoader;
+  }
+} catch {
+  // Ignore in pure ESM environment
+}

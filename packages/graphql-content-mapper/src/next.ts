@@ -59,5 +59,11 @@ export function withGraphQLContentMapper(
 
 export default withGraphQLContentMapper;
 
-module.exports = withGraphQLContentMapper;
-module.exports.withGraphQLContentMapper = withGraphQLContentMapper;
+try {
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = withGraphQLContentMapper;
+    module.exports.withGraphQLContentMapper = withGraphQLContentMapper;
+  }
+} catch {
+  // Ignore in pure ESM environment
+}

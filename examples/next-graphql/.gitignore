@@ -1,0 +1,12 @@
+node_modules
+.next
+tsconfig.tsbuildinfo
+coverage
+.vscode
+.log
+.env.local
+
+.agents
+.claude
+.windsurf
+certificates

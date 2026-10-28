@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
+  "contentMappers": [
+    {
+      "package": "graphql-content-mapper",
+      "extensions": [".graphql"],
+      "options": {
+        "schema": "./schema.graphql",
+        "scalars": {
+          "DateTime": "string",
+          "CustomJSON": "Record<string, unknown>"
+        },
+        "skipTypename": true
+      }
+    }
+  ]
+}

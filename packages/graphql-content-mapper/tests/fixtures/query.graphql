@@ -1,0 +1,18 @@
+fragment UserFields on User {
+  id
+  name
+  role
+}
+
+query GetUsers($role: UserRole) {
+  users(role: $role) {
+    ...UserFields
+    createdAt
+  }
+}
+
+mutation AddUser($name: String!, $role: UserRole!) {
+  createUser(name: $name, role: $role) {
+    ...UserFields
+  }
+}

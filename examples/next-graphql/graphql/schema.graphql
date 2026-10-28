@@ -1,0 +1,288 @@
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+"""The `Byte` scalar type represents byte value as a Buffer"""
+scalar Bytes
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar Json @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+"""
+A field whose value is a hexadecimal: https://en.wikipedia.org/wiki/Hexadecimal.
+"""
+scalar Decimal
+
+enum OrderBy {
+  Asc
+  Desc
+}
+
+input CategoryFilter {
+  id: StringFilter
+  name: StringFilter
+  posts: PostListFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input StringFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  not: StringFilter
+  is: String
+  isNot: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+}
+
+input PostFilter {
+  id: StringFilter
+  published: BooleanFilter
+  title: StringFilter
+  content: StringFilter
+  categories: CategoryListFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+  publishedAt: DateTimeFilter
+}
+
+input BooleanFilter {
+  equals: Boolean
+  in: [Boolean!]
+  notIn: [Boolean!]
+  not: BooleanFilter
+  is: Boolean
+  isNot: Boolean
+}
+
+input CategoryListFilter {
+  every: CategoryFilter
+  some: CategoryFilter
+  none: CategoryFilter
+}
+
+input DateTimeFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  not: DateTimeFilter
+  is: DateTime
+  isNot: DateTime
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+}
+
+input PostListFilter {
+  every: PostFilter
+  some: PostFilter
+  none: PostFilter
+}
+
+input CategoryOrderBy {
+  id: OrderBy
+  name: OrderBy
+  posts: PostOrderBy
+  createdAt: OrderBy
+  updatedAt: OrderBy
+}
+
+input PostOrderBy {
+  id: OrderBy
+  published: OrderBy
+  title: OrderBy
+  content: OrderBy
+  categories: CategoryOrderBy
+  createdAt: OrderBy
+  updatedAt: OrderBy
+  publishedAt: OrderBy
+}
+
+input PostUniqueFilter {
+  id: String
+}
+
+input CategoryUniqueFilter {
+  id: String
+}
+
+input PostCreateInput {
+  id: String
+  published: Boolean
+  title: String
+  content: String
+  categories: PostCreateCategoriesRelationInput
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input PostCreateCategoriesRelationInput {
+  create: [CategoryCreateInput!]
+  connect: [CategoryUniqueFilter!]
+}
+
+input CategoryCreateInput {
+  id: String
+  name: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PostUpdateInput {
+  id: String
+  published: Boolean
+  title: String
+  content: String
+  categories: PostUpdateCategoriesRelationInput
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input PostUpdateCategoriesRelationInput {
+  create: [CategoryCreateInput!]
+  set: [CategoryUniqueFilter!]
+  disconnect: [CategoryUniqueFilter!]
+  delete: [CategoryUniqueFilter!]
+  connect: [CategoryUniqueFilter!]
+  update: [PostUpdateCategoriesRelationInputUpdate!]
+  updateMany: [PostUpdateCategoriesRelationInputUpdateMany!]
+  deleteMany: [CategoryWithoutPostsFilter!]
+}
+
+input CategoryUpdateWithoutPostsInput {
+  id: String
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input CategoryWithoutPostsFilter {
+  id: StringFilter
+  name: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PostUpdateCategoriesRelationInputUpdate {
+  where: CategoryUniqueFilter
+  data: CategoryUpdateWithoutPostsInput
+}
+
+input PostUpdateCategoriesRelationInputUpdateMany {
+  where: CategoryWithoutPostsFilter
+  data: CategoryUpdateWithoutPostsInput
+}
+
+input CategoryUpdateInput {
+  id: String
+  name: String
+  posts: CategoryUpdatePostsRelationInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input CategoryUpdatePostsRelationInput {
+  create: [PostCreateInput!]
+  set: [PostUniqueFilter!]
+  disconnect: [PostUniqueFilter!]
+  delete: [PostUniqueFilter!]
+  connect: [PostUniqueFilter!]
+  update: [CategoryUpdatePostsRelationInputUpdate!]
+  updateMany: [CategoryUpdatePostsRelationInputUpdateMany!]
+  deleteMany: [PostWithoutCategoriesFilter!]
+}
+
+input PostUpdateWithoutCategoriesInput {
+  id: String
+  published: Boolean
+  title: String
+  content: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  publishedAt: DateTime
+}
+
+input PostWithoutCategoriesFilter {
+  id: StringFilter
+  published: BooleanFilter
+  title: StringFilter
+  content: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+  publishedAt: DateTimeFilter
+}
+
+input CategoryUpdatePostsRelationInputUpdate {
+  where: PostUniqueFilter
+  data: PostUpdateWithoutCategoriesInput
+}
+
+input CategoryUpdatePostsRelationInputUpdateMany {
+  where: PostWithoutCategoriesFilter
+  data: PostUpdateWithoutCategoriesInput
+}
+
+type Post {
+  id: ID!
+  published: Boolean!
+  title: String!
+  content: String!
+  categories(filter: CategoryFilter, orderBy: [CategoryOrderBy!], limit: Int, offset: Int): [Category!]!
+  categoriesCount(filter: CategoryFilter): Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  publishedAt: DateTime!
+}
+
+type Category {
+  id: ID!
+  name: String!
+  posts(filter: PostFilter, orderBy: [PostOrderBy!], limit: Int, offset: Int): [Post!]!
+  postsCount(filter: PostFilter): Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  countPost(filter: PostFilter): Int!
+  countCategory(filter: CategoryFilter): Int!
+  findUniquePost(filter: PostUniqueFilter!): Post!
+  findUniqueCategory(filter: CategoryUniqueFilter!): Category!
+  findFirstPost(filter: PostFilter, orderBy: [PostOrderBy!]): Post
+  findFirstCategory(filter: CategoryFilter, orderBy: [CategoryOrderBy!]): Category
+  findManyPost(filter: PostFilter, orderBy: [PostOrderBy!], limit: Int, offset: Int): [Post!]!
+  findManyCategory(filter: CategoryFilter, orderBy: [CategoryOrderBy!], limit: Int, offset: Int): [Category!]!
+}
+
+type Mutation {
+  createOnePost(input: PostCreateInput!): Post!
+  createOneCategory(input: CategoryCreateInput!): Category!
+  createManyPost(input: [PostCreateInput!]!): Int!
+  createManyCategory(input: [CategoryCreateInput!]!): Int!
+  updateOnePost(where: PostUniqueFilter!, data: PostUpdateInput!): Post!
+  updateOneCategory(where: CategoryUniqueFilter!, data: CategoryUpdateInput!): Category!
+  updateManyPost(where: PostFilter!, data: PostUpdateInput!): Int!
+  updateManyCategory(where: CategoryFilter!, data: CategoryUpdateInput!): Int!
+  deleteOnePost(where: PostUniqueFilter!): Post!
+  deleteOneCategory(where: CategoryUniqueFilter!): Category!
+  deleteManyPost(where: PostFilter!): Int!
+  deleteManyCategory(where: CategoryFilter!): Int!
+}

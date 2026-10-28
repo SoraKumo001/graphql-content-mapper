@@ -1,0 +1,25 @@
+scalar DateTime
+scalar CustomJSON
+
+enum UserRole {
+  ADMIN
+  USER
+  GUEST
+}
+
+type User {
+  id: ID!
+  name: String!
+  role: UserRole!
+  createdAt: DateTime!
+  metadata: CustomJSON
+}
+
+type Query {
+  users(role: UserRole): [User!]!
+  user(id: ID!): User
+}
+
+type Mutation {
+  createUser(name: String!, role: UserRole!): User!
+}

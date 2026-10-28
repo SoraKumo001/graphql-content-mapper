@@ -1,54 +1,15 @@
 {
-  "name": "graphql-content-mapper",
+  "name": "graphql-content-mapper-monorepo",
   "version": "1.0.0",
-  "description": "Zero-codegen GraphQL TypedDocumentNode and enum loader for TypeScript 7.1 Content Mappers, Vite, and Next.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./loader": {
-      "types": "./dist/loader.d.ts",
-      "default": "./dist/loader.js"
-    },
-    "./vite": {
-      "types": "./dist/vite.d.ts",
-      "default": "./dist/vite.js"
-    },
-    "./next": {
-      "types": "./dist/next.d.ts",
-      "default": "./dist/next.js"
-    },
-    "./compiler": {
-      "types": "./dist/compiler.d.ts",
-      "default": "./dist/compiler.js"
-    },
-    "./config": {
-      "types": "./dist/config.d.ts",
-      "default": "./dist/config.js"
-    }
-  },
+  "private": true,
+  "description": "Monorepo for graphql-content-mapper and its example applications",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
-  },
-  "peerDependencies": {
-    "@graphql-codegen/cli": ">=5.0.0",
-    "@graphql-codegen/typescript": ">=4.0.0",
-    "@graphql-codegen/typescript-operations": ">=4.0.0",
-    "graphql": "^16.0.0 || ^17.0.0"
-  },
-  "typescript": {
-    "contentMapper": {
-      "exec": [
-        "node",
-        "dist/index.js"
-      ],
-      "outputExtensions": {
-        ".graphql": ".js",
-        ".gql": ".js"
-      }
-    }
+    "build": "pnpm --filter graphql-content-mapper build",
+    "test": "pnpm --filter graphql-content-mapper test",
+    "test:watch": "pnpm --filter graphql-content-mapper test:watch",
+    "typecheck": "pnpm --filter graphql-content-mapper build && pnpm --filter next-graphql typecheck",
+    "dev:next": "pnpm --filter next-graphql dev:next",
+    "build:next": "pnpm --filter graphql-content-mapper build && pnpm --filter next-graphql build",
+    "prisma:generate": "pnpm --filter next-graphql prisma:generate"
   }
 }

@@ -1,0 +1,609 @@
+fragment post on Post {
+  id
+  published
+  title
+  content
+  createdAt
+  updatedAt
+  publishedAt
+}
+
+fragment category on Category {
+  id
+  name
+  createdAt
+  updatedAt
+}
+
+query CountPost(
+  $filter: PostFilter
+) {
+  countPost(
+    filter: $filter
+  )
+}
+
+query CountCategory(
+  $filter: CategoryFilter
+) {
+  countCategory(
+    filter: $filter
+  )
+}
+
+query FindUniquePost(
+  $filter: PostUniqueFilter!,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  findUniquePost(
+    filter: $filter
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+query FindUniqueCategory(
+  $filter: CategoryUniqueFilter!,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  findUniqueCategory(
+    filter: $filter
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+query FindFirstPost(
+  $filter: PostFilter,
+  $orderBy: [PostOrderBy!],
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  findFirstPost(
+    filter: $filter,
+    orderBy: $orderBy
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+query FindFirstCategory(
+  $filter: CategoryFilter,
+  $orderBy: [CategoryOrderBy!],
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  findFirstCategory(
+    filter: $filter,
+    orderBy: $orderBy
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+query FindManyPost(
+  $filter: PostFilter,
+  $orderBy: [PostOrderBy!],
+  $limit: Int,
+  $offset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  findManyPost(
+    filter: $filter,
+    orderBy: $orderBy,
+    limit: $limit,
+    offset: $offset
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+query FindManyCategory(
+  $filter: CategoryFilter,
+  $orderBy: [CategoryOrderBy!],
+  $limit: Int,
+  $offset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  findManyCategory(
+    filter: $filter,
+    orderBy: $orderBy,
+    limit: $limit,
+    offset: $offset
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+mutation CreateOnePost(
+  $input: PostCreateInput!,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  createOnePost(
+    input: $input
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+mutation CreateOneCategory(
+  $input: CategoryCreateInput!,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  createOneCategory(
+    input: $input
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+mutation CreateManyPost(
+  $input: [PostCreateInput!]!
+) {
+  createManyPost(
+    input: $input
+  )
+}
+
+mutation CreateManyCategory(
+  $input: [CategoryCreateInput!]!
+) {
+  createManyCategory(
+    input: $input
+  )
+}
+
+mutation UpdateOnePost(
+  $where: PostUniqueFilter!,
+  $data: PostUpdateInput!,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  updateOnePost(
+    where: $where,
+    data: $data
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+mutation UpdateOneCategory(
+  $where: CategoryUniqueFilter!,
+  $data: CategoryUpdateInput!,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  updateOneCategory(
+    where: $where,
+    data: $data
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+mutation UpdateManyPost(
+  $where: PostFilter!,
+  $data: PostUpdateInput!
+) {
+  updateManyPost(
+    where: $where,
+    data: $data
+  )
+}
+
+mutation UpdateManyCategory(
+  $where: CategoryFilter!,
+  $data: CategoryUpdateInput!
+) {
+  updateManyCategory(
+    where: $where,
+    data: $data
+  )
+}
+
+mutation DeleteOnePost(
+  $where: PostUniqueFilter!,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $postsCountFilter: PostFilter,
+  $categoriesCountFilter: CategoryFilter
+) {
+  deleteOnePost(
+    where: $where
+  ) {
+    ...post
+    categories(
+      filter: $categoriesFilter,
+      orderBy: $categoriesOrderBy,
+      limit: $categoriesLimit,
+      offset: $categoriesOffset
+    ) {
+      ...category
+      posts(
+        filter: $postsFilter,
+        orderBy: $postsOrderBy,
+        limit: $postsLimit,
+        offset: $postsOffset
+      ) {
+        ...post
+      }
+      postsCount(
+        filter: $postsCountFilter
+      )
+    }
+    categoriesCount(
+      filter: $categoriesCountFilter
+    )
+  }
+}
+
+mutation DeleteOneCategory(
+  $where: CategoryUniqueFilter!,
+  $postsFilter: PostFilter,
+  $postsOrderBy: [PostOrderBy!],
+  $postsLimit: Int,
+  $postsOffset: Int,
+  $categoriesFilter: CategoryFilter,
+  $categoriesOrderBy: [CategoryOrderBy!],
+  $categoriesLimit: Int,
+  $categoriesOffset: Int,
+  $categoriesCountFilter: CategoryFilter,
+  $postsCountFilter: PostFilter
+) {
+  deleteOneCategory(
+    where: $where
+  ) {
+    ...category
+    posts(
+      filter: $postsFilter,
+      orderBy: $postsOrderBy,
+      limit: $postsLimit,
+      offset: $postsOffset
+    ) {
+      ...post
+      categories(
+        filter: $categoriesFilter,
+        orderBy: $categoriesOrderBy,
+        limit: $categoriesLimit,
+        offset: $categoriesOffset
+      ) {
+        ...category
+      }
+      categoriesCount(
+        filter: $categoriesCountFilter
+      )
+    }
+    postsCount(
+      filter: $postsCountFilter
+    )
+  }
+}
+
+mutation DeleteManyPost(
+  $where: PostFilter!
+) {
+  deleteManyPost(
+    where: $where
+  )
+}
+
+mutation DeleteManyCategory(
+  $where: CategoryFilter!
+) {
+  deleteManyCategory(
+    where: $where
+  )
+}
+
