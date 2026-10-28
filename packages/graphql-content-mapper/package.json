@@ -2,6 +2,31 @@
   "name": "graphql-content-mapper",
   "version": "1.0.0",
   "description": "Zero-codegen GraphQL TypedDocumentNode and enum loader for TypeScript 7.1 Content Mappers, Vite, and Next.js",
+  "author": "SoraKumo",
+  "license": "MIT",
+  "homepage": "https://github.com/SoraKumo001/graphql-content-mapper#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SoraKumo001/graphql-content-mapper.git",
+    "directory": "packages/graphql-content-mapper"
+  },
+  "bugs": {
+    "url": "https://github.com/SoraKumo001/graphql-content-mapper/issues"
+  },
+  "keywords": [
+    "graphql",
+    "typescript",
+    "content-mapper",
+    "typed-document-node",
+    "vite",
+    "nextjs",
+    "turbopack",
+    "webpack",
+    "zero-codegen"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -37,20 +62,15 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build && npm test",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@graphql-codegen/cli": ">=5.0.0",
-    "@graphql-codegen/typescript": ">=4.0.0",
-    "@graphql-codegen/typescript-operations": ">=4.0.0",
     "graphql": "^16.0.0 || ^17.0.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^7.4.6",
-    "@graphql-codegen/typescript": "^6.1.2",
-    "@graphql-codegen/typescript-operations": "^6.1.10",
     "@types/node": "^26.6.5",
     "graphql": "^17.0.2",
     "typescript": "^7.1.0-beta",

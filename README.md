@@ -1,63 +1,64 @@
 # graphql-content-mapper Monorepo
 
-TypeScript 7.1 Content Mappers を活用した GraphQL 型・ローダーライブラリ **`graphql-content-mapper`** と、Next.js 16 サンプルアプリケーションのモノレポです。
+Monorepo containing **`graphql-content-mapper`** (a zero-codegen GraphQL type and loader toolkit powered by TypeScript 7.1 Content Mappers) and a Next.js 16 full-stack example application.
 
 ---
 
-## 📁 ディレクトリ構成
+## 📁 Repository Structure
 
 ```
 graphql-content-mapper/
 ├── packages/
-│   └── graphql-content-mapper/   # ライブラリ本体 (npm パッケージ)
+│   └── graphql-content-mapper/   # Core library (npm package)
 │       ├── src/
 │       │   ├── index.ts          # TypeScript 7.1 Content Mapper (JSON-RPC stdio)
-│       │   ├── compiler.ts       # ESM AST コンパイラ & Enum 抽出
-│       │   ├── config.ts         # 設定リゾルバー (tsconfig options 等)
-│       │   ├── loader.ts         # Webpack / Turbopack ローダー
-│       │   ├── next.ts           # Next.js ヘルパー (withGraphQLContentMapper)
-│       │   └── vite.ts           # Vite / Rollup プラグイン
-│       └── tests/                # Vitest 単体 & E2E テストスイート
+│       │   ├── typegen.ts        # In-memory GraphQL AST type generator
+│       │   ├── compiler.ts       # ESM AST compiler & Enum extractor
+│       │   ├── config.ts         # Configuration resolver (tsconfig options, etc.)
+│       │   ├── loader.ts         # Webpack / Turbopack loader
+│       │   ├── next.ts           # Next.js helper (withGraphQLContentMapper)
+│       │   └── vite.ts           # Vite / Rollup plugin
+│       └── tests/                # Vitest unit & E2E test suites
 │
 └── examples/
-    └── next-graphql/             # Next.js 16 (App Router + Turbopack) サンプルアプリ
+    └── next-graphql/             # Next.js 16 (App Router + Turbopack) example app
         ├── graphql/
-        │   ├── schema.graphql    # サーバー側 GraphQL スキーマ
-        │   └── query.graphql     # クライアント用オペレーション定義
-        ├── prisma/               # データベーススキーマ
-        ├── src/                  # React 19 / Urql フロントエンド & Yoga サーバー
-        └── tsconfig.json         # contentMappers 設定
+        │   ├── schema.graphql    # Server-side GraphQL schema
+        │   └── query.graphql     # Client-side GraphQL operation definitions
+        ├── prisma/               # Prisma database schema
+        ├── src/                  # React 19 / Urql frontend & Yoga GraphQL server
+        └── tsconfig.json         # contentMappers configuration
 ```
 
 ---
 
-## 🚀 クイックスタート
+## 🚀 Quick Start
 
-### 1. 依存関係のインストール
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2. ライブラリのビルド
+### 2. Build Core Library
 
 ```bash
 pnpm build
 ```
 
-### 3. ライブラリのテスト実行
+### 3. Run Test Suite
 
 ```bash
 pnpm test
 ```
 
-### 4. サンプルアプリの型チェック
+### 4. Type Check Example App
 
 ```bash
 pnpm typecheck
 ```
 
-### 5. サンプルアプリの開発サーバー起動
+### 5. Start Development Server
 
 ```bash
 pnpm dev:next
@@ -65,6 +66,6 @@ pnpm dev:next
 
 ---
 
-## 📜 ライセンス
+## 📜 License
 
 MIT

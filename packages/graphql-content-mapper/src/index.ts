@@ -2,8 +2,8 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import process from "node:process";
 import { Buffer } from "node:buffer";
-import { parse, type DocumentNode, type OperationDefinitionNode } from "graphql";
 import { resolveConfig, type MapperConfig } from "./config.js";
+import { generateTypeScriptFromGraphQL } from "./typegen.js";
 
 interface JsonRpcRequest {
   jsonrpc?: string;
@@ -33,7 +33,7 @@ interface ProjectContext {
 
 const originalStdoutWrite = process.stdout.write.bind(process.stdout);
 
-// Mute stdout during any library logs so JSON-RPC framing is not corrupted
+// Mute stdout during any unexpected logs so JSON-RPC framing is not corrupted
 process.stdout.write = ((chunk: any, encoding?: any, callback?: any): boolean => {
   if (typeof encoding === "function") {
     encoding();
@@ -80,58 +80,13 @@ process.stdin.on("data", (chunk: Buffer) => {
   }
 });
 
-function deduplicateDeclarations(content: string): string {
-  const lines = content.split("\n");
-  const seen = new Set<string>();
-  const cleaned: string[] = [];
-  let skipping = false;
-  let braceCount = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (!skipping) {
-      const match = line.match(/^export (?:type|enum)\s+(\w+)/);
-      if (match) {
-        const name = match[1];
-        if (seen.has(name)) {
-          skipping = true;
-          braceCount = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
-          if (braceCount === 0 && line.trim().endsWith(";")) {
-            skipping = false;
-          }
-          continue;
-        } else {
-          seen.add(name);
-        }
-      }
-      cleaned.push(line);
-    } else {
-      braceCount += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
-      if (braceCount === 0 && line.trim().endsWith(";")) {
-        skipping = false;
-      }
-    }
-  }
-  return cleaned.join("\n");
-}
-
-// Lazy-load @graphql-codegen/cli so initialize responds instantly (<10ms)
-let cachedExecuteCodegen: ((options: any) => Promise<any>) | null = null;
-async function getExecuteCodegen() {
-  if (!cachedExecuteCodegen) {
-    const mod = await import("@graphql-codegen/cli");
-    cachedExecuteCodegen = mod.executeCodegen;
-  }
-  return cachedExecuteCodegen;
-}
-
 const projectContextMap = new Map<unknown, ProjectContext>();
 
-async function transformGraphQL(
+function transformGraphQL(
   fileName: string,
   content: string,
   projectHandle: unknown
-): Promise<TransformResult> {
+): TransformResult {
   const context = projectContextMap.get(projectHandle) || { projectDir: process.cwd() };
   const { config, schemaPath } = resolveConfig(
     context.projectDir,
@@ -156,61 +111,7 @@ async function transformGraphQL(
   }
 
   try {
-    const doc: DocumentNode = parse(content);
-    const executeCodegen = await getExecuteCodegen();
-
-    const codegenConfig: Record<string, any> = {
-      scalars: config.scalars,
-      skipTypename: config.skipTypename ?? false,
-      ...(config.enumsAsTypes !== undefined && { enumsAsTypes: config.enumsAsTypes }),
-      ...(config.futureProofEnums !== undefined && { futureProofEnums: config.futureProofEnums }),
-      ...config.codegenConfig,
-    };
-
-    const codegenResult = await executeCodegen({
-      schema: schemaPath,
-      documents: fileName,
-      generates: {
-        "virtual.ts": {
-          plugins: ["typescript", "typescript-operations"],
-          config: codegenConfig,
-        },
-      },
-    });
-
-    const rawGenerated = codegenResult?.result?.[0]?.content || "";
-    const cleanGenerated = deduplicateDeclarations(rawGenerated);
-
-    const operations = doc.definitions
-      .filter((d): d is OperationDefinitionNode => d.kind === "OperationDefinition" && !!d.name)
-      .map((d) => ({
-        name: d.name!.value,
-        op: d.operation.charAt(0).toUpperCase() + d.operation.slice(1),
-      }));
-
-    const docTypeDefinitions = `
-import type { DocumentNode } from "graphql";
-
-export interface TypedDocumentNode<
-  Result = { [key: string]: any },
-  Variables = { [key: string]: any },
-> extends DocumentNode {
-  /**
-   * Type signature used for inference
-   */
-  __apiType?: (variables: Variables) => Result;
-}
-`;
-
-    const docExports = operations
-      .map((o) => {
-        const varType = o.name + o.op + "Variables";
-        const resType = o.name + o.op;
-        return `export declare const ${o.name}: TypedDocumentNode<${resType}, ${varType}>;`;
-      })
-      .join("\n");
-
-    const fullText = [docTypeDefinitions, cleanGenerated, docExports].join("\n\n");
+    const fullText = generateTypeScriptFromGraphQL(content, schemaPath, config);
 
     return {
       text: fullText,
@@ -226,7 +127,7 @@ export interface TypedDocumentNode<
   }
 }
 
-async function handleMessage(msg: JsonRpcRequest): Promise<void> {
+function handleMessage(msg: JsonRpcRequest): void {
   if (msg.id === undefined) return;
 
   let result: any = null;
@@ -251,7 +152,7 @@ async function handleMessage(msg: JsonRpcRequest): Promise<void> {
       break;
     case "transform":
       {
-        result = await transformGraphQL(
+        result = transformGraphQL(
           msg.params?.fileName,
           msg.params?.content,
           msg.params?.projectHandle

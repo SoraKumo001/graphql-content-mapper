@@ -2,6 +2,8 @@
   "name": "graphql-content-mapper-monorepo",
   "version": "1.0.0",
   "private": true,
+  "author": "SoraKumo",
+  "license": "MIT",
   "description": "Monorepo for graphql-content-mapper and its example applications",
   "scripts": {
     "build": "pnpm --filter graphql-content-mapper build",
@@ -10,6 +12,11 @@
     "typecheck": "pnpm --filter graphql-content-mapper build && pnpm --filter next-graphql typecheck",
     "dev:next": "pnpm --filter next-graphql dev:next",
     "build:next": "pnpm --filter graphql-content-mapper build && pnpm --filter next-graphql build",
-    "prisma:generate": "pnpm --filter next-graphql prisma:generate"
+    "prisma:generate": "pnpm --filter next-graphql prisma:generate",
+    "publish:mapper": "pnpm --filter graphql-content-mapper publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SoraKumo001/graphql-content-mapper.git"
   }
 }

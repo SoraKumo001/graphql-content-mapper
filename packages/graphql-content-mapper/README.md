@@ -1,55 +1,54 @@
 # graphql-content-mapper
 
-TypeScript 7.1 の新機能 **Content Mappers** を利用し、`.graphql` / `.gql` ファイルから直接 `TypedDocumentNode` や Enum を型安全にインポート可能にするツールキットです。
+A zero-codegen toolkit powered by TypeScript 7.1 **Content Mappers** that allows you to directly import type-safe `TypedDocumentNode` documents and schema Enums from `.graphql` / `.gql` files.
 
-物理ファイル（`src/generated/graphql.ts` 等）の事前生成や watch プロセスの常駐を必要とせず、エディタ上およびビルド時にメモリ上で型解決とランタイムコードの変換を行います。
+No intermediate physical files (`src/generated/graphql.ts`, etc.) or background watch processes are required. Type resolution and runtime code transformation occur on the fly in memory during editing and bundling.
 
 ---
 
-## ✨ 特徴
+## ✨ Features
 
-- **静的コード生成の不要化**:
-  - `graphql-codegen` などの静的ファイル出力タスクを実行・常駐させる必要がありません。
-- **TypeScript 7.1 Content Mappers 準拠**:
-  - コンパイル時および VS Code 等の Language Server (LSP) と JSON-RPC 2.0 (stdio) で対話し、仮想の TypeScript 定義をオンデマンド供給。
-- **マルチバンドラ対応**:
+- **Zero Static Code Generation**:
+  - No need to run or maintain background code generator tasks like `graphql-codegen`.
+- **Native TypeScript 7.1 Content Mappers Compliance**:
+  - Interacts directly with `tsc` and Language Server Protocols (LSP in VS Code) via JSON-RPC 2.0 (stdio) to supply virtual TypeScript definitions on demand.
+- **Multi-Bundler Support**:
   - **Vite** (`graphql-content-mapper/vite`)
   - **Next.js** (Turbopack / Webpack) (`graphql-content-mapper/next`)
-  - **Webpack / その他** (`graphql-content-mapper/loader`)
-- **純粋な ES Modules (ESM) 出力**:
-  - クエリの `DocumentNode` や `schema.graphql` 内の Enum を `export const` としてネイティブ ESM 出力するため、最新のブラウザ・バンドラでスムーズに動作。
-- **柔軟な設定**:
-  - スキーマパスやカスタムスカラー型（`DateTime` など）を `package.json` でカスタマイズ可能。
+  - **Webpack / Other bundlers** (`graphql-content-mapper/loader`)
+- **Pure ES Modules (ESM) Output**:
+  - Compiles query `DocumentNode` objects and schema Enums into native ESM (`export const ...`), ensuring seamless execution in modern browsers and runtimes.
+- **Flexible Configuration**:
+  - Specify custom scalars (e.g. `DateTime: "string"`) and schema paths directly in `tsconfig.json` or via environment variables / configuration files.
 
 ---
 
-## 📦 インストール
+## 📦 Installation
 
 ```bash
 # pnpm
-pnpm add -D graphql-content-mapper graphql @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations
+pnpm add -D graphql-content-mapper graphql
 
 # npm
-npm install -D graphql-content-mapper graphql @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations
+npm install -D graphql-content-mapper graphql
 
 # yarn
-yarn add -D graphql-content-mapper graphql @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations
+yarn add -D graphql-content-mapper graphql
 ```
 
 ---
 
-## ⚙️ 基本設定
+## ⚙️ Configuration
 
-### 1. `tsconfig.json` での一括設定 (推奨: パターンA)
+### 1. Unified Configuration in `tsconfig.json` (Recommended)
 
-TypeScript 7.1 の `contentMappers` の `options` にスキーマファイルパスやカスタムスカラーを定義します。
-バンドラ（Next.js / Vite / Webpack）もこの設定を自動的に読み込むため、**`tsconfig.json` 1箇所に設定するだけで型解決とバンドルの双方が連携**します：
+Define the schema path and custom scalars under the `contentMappers[].options` field in TypeScript 7.1. Bundlers (Next.js / Vite / Webpack) automatically read this configuration, keeping your type resolution and bundling synchronized in a single place:
 
 ```jsonc
 {
   "compilerOptions": {
     "moduleResolution": "bundler"
-    // その他の compilerOptions
+    // Other compilerOptions
   },
   "contentMappers": [
     {
@@ -72,27 +71,27 @@ TypeScript 7.1 の `contentMappers` の `options` にスキーマファイルパ
 }
 ```
 
-> **Note**: 型チェックを実行する際は `tsc --runExternalCode --noEmit` を使用します。
+> **Note**: To run type-checking from the command line, use `tsc --runExternalCode --noEmit`.
 
-### 2. その他の設定方法 (個別上書き用)
+### 2. Alternative Configuration Methods (Overrides)
 
-`tsconfig.json` 以外にも、必要に応じて以下の方法でスキーマパスやスカラーを上書き指定できます：
+You can also override options individually using any of the following methods:
 
-1. **プラグイン / ローダーの直接オプション**:
+1. **Direct Plugin / Loader Options**:
    - **Next.js**: `withGraphQL(nextConfig, { schema: "custom/schema.graphql", scalars: { DateTime: "string" } })`
    - **Vite**: `graphql({ schema: "custom/schema.graphql", scalars: { DateTime: "string" } })`
    - **Webpack**: `{ loader: "graphql-content-mapper/loader", options: { schema: "custom/schema.graphql" } }`
 
-2. **環境変数**:
+2. **Environment Variable**:
    ```bash
    export GRAPHQL_SCHEMA_PATH="custom/schema.graphql"
    ```
 
-3. **設定ファイル**:
+3. **Configuration Files**:
    - `graphql-content-mapper.config.json`
    - `.graphqlrc` / `.graphqlrc.json`
    - `graphql.config.json`
-   - `package.json` の `"graphqlContentMapper"` フィールド:
+   - `"graphqlContentMapper"` key in `package.json`:
      ```json
      {
        "graphqlContentMapper": {
@@ -106,11 +105,11 @@ TypeScript 7.1 の `contentMappers` の `options` にスキーマファイルパ
 
 ---
 
-## 🚀 バンドラ連携
+## 🚀 Bundler Integration
 
 ### Next.js (App Router / Pages Router)
 
-`next.config.js` で `graphql-content-mapper/next` をラップするだけで、Turbopack と Webpack の両方のローダー設定が自動的に構成されます：
+Wrap your Next.js config with `graphql-content-mapper/next`. Both Turbopack and Webpack loaders will be configured automatically:
 
 ```js
 // next.config.js
@@ -118,7 +117,7 @@ const withGraphQL = require("graphql-content-mapper/next");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // お好みの Next.js 設定
+  // Your Next.js config
 };
 
 module.exports = withGraphQL(nextConfig);
@@ -128,7 +127,7 @@ module.exports = withGraphQL(nextConfig);
 
 ### Vite
 
-`vite.config.ts` に `graphql-content-mapper/vite` プラグインを追加します：
+Add the `graphql-content-mapper/vite` plugin to `vite.config.ts`:
 
 ```ts
 // vite.config.ts
@@ -139,19 +138,19 @@ import graphql from "graphql-content-mapper/vite";
 export default defineConfig({
   plugins: [
     react(),
-    graphql(), // スキーマ変更の監視 (HMR) も自動で行われます
+    graphql(), // Automatically watches schema changes with HMR
   ],
 });
 ```
 
-オプションとして直接スキーマパスを渡すことも可能です：
+You can also pass custom options directly:
 ```ts
 graphql({ schema: "src/graphql/schema.graphql" })
 ```
 
 ---
 
-### Webpack (直接指定する場合)
+### Webpack (Manual Setup)
 
 ```js
 // webpack.config.js
@@ -170,9 +169,9 @@ module.exports = {
 
 ---
 
-## 💻 使用例
+## 💻 Usage Example
 
-### 1. GraphQL ファイルの定義
+### 1. Define GraphQL Operations
 
 ```graphql
 # graphql/query.graphql
@@ -192,23 +191,23 @@ mutation CreateBook($title: String!) {
 }
 ```
 
-### 2. TypeScript / React コンポーネントからの利用
+### 2. Import into TypeScript / React Components
 
-生成ファイルを介さず、`.graphql` から直接 Named Import して使用します：
+Directly import named exports from `.graphql` files with complete type safety without generating static `.ts` files:
 
 ```tsx
-import { useQuery, useMutation } from "urql"; // または @apollo/client 等
+import { useQuery, useMutation } from "urql"; // or @apollo/client
 import {
   FindBooks,      // TypedDocumentNode<FindBooksQuery, FindBooksQueryVariables>
   CreateBook,     // TypedDocumentNode<CreateBookMutation, CreateBookMutationVariables>
-  OrderBy,        // Enum (例: { Asc: "Asc", Desc: "Desc" })
+  OrderBy,        // Enum (e.g. { Asc: "Asc", Desc: "Desc" })
 } from "../graphql/query.graphql";
 
 export function BookList() {
   const [{ data, fetching }] = useQuery({
     query: FindBooks,
     variables: {
-      order: OrderBy.Asc, // 完全型安全
+      order: OrderBy.Asc, // Fully type-safe
     },
   });
 
@@ -228,29 +227,29 @@ export function BookList() {
 
 ---
 
-## 🏛️ アーキテクチャ
+## 🏛️ Architecture
 
 ```
-[クライアントコード (.tsx)]
+[Client Code (.tsx)]
        │ import { FindBooks, OrderBy } from "./query.graphql"
-       ├───► [エディタ / tsc (TypeScript 7.1)]
+       ├───► [Editor / tsc (TypeScript 7.1)]
        │         │ (JSON-RPC stdio)
        │         ▼
-       │     [graphql-content-mapper (型解決)]
-       │         │ schema.graphql と AST からメモリ上で型を合成
-       │         └─► TypedDocumentNode & Enum の型情報を返却
+       │     [graphql-content-mapper (Type Resolution)]
+       │         │ Synthesizes types in memory from schema.graphql & query AST
+       │         └─► Returns TypedDocumentNode & Enum type definitions
        │
-       └───► [バンドラ (Next.js / Vite / Webpack)]
-                 │ (ローダー / プラグイン)
+       └───► [Bundler (Next.js / Vite / Webpack)]
+                 │ (Loader / Plugin)
                  ▼
-             [graphql-content-mapper (ランタイム変換)]
-                 │ AST をパースして純粋な ESM コードを出力
+             [graphql-content-mapper (Runtime Compilation)]
+                 │ Parses AST and emits pure ESM code
                  └─► export const FindBooks = { ... };
                      export const OrderBy = { ... };
 ```
 
 ---
 
-## 📄 ライセンス
+## 📄 License
 
 MIT

@@ -1,28 +1,28 @@
 # next-graphql
 
-TypeScript 7.1 の新機能 **Content Mappers** を活用し、`graphql-codegen` による物理ファイルの事前生成を不要にした、次世代のフルスタック GraphQL アプリケーション構成です。
+A modern full-stack GraphQL application demonstrating the power of TypeScript 7.1 **Content Mappers**, eliminating the need for static file pre-generation via `graphql-codegen`.
 
 ---
 
-## 🌟 主な特徴
+## 🌟 Key Features
 
-- **`.graphql` ファイルの直接インポート**
-  - `graphql/query.graphql` から直接クエリドキュメント（`TypedDocumentNode`）や Enum 定義をインポート可能。
-  - 静的ファイル出力（`src/generated/graphql.ts` など）の生成・更新タスクや watch プロセスの常駐が一切不要。
-- **TypeScript 7.1 Content Mappers の自作実装**
-  - `packages/graphql-content-mapper` 内に JSON-RPC stdio サーバーを TypeScript で実装。
-  - コンパイル時にメモリ上で GraphQL AST を解析し、仮想の TypeScript 定義を動的供給。
-- **Next.js 16 (App Router + Turbopack / Webpack) 対応**
-  - カスタムローダーにより、Turbopack / Webpack 双方で `.graphql` を実行時モジュールとして直接ロード。
-- **フルスタック型安全**
-  - **サーバー**: Pothos GraphQL + Prisma + GraphQL Yoga によるコードファーストなスキーマ構築。
-  - **クライアント**: Urql による完全型推論（`useQuery`, `useMutation`）。
+- **Direct `.graphql` File Imports**:
+  - Directly import query documents (`TypedDocumentNode`) and schema Enums from `graphql/query.graphql`.
+  - No static generated files (`src/generated/graphql.ts`, etc.) or background watch processes needed.
+- **Custom TypeScript 7.1 Content Mapper**:
+  - Implemented as a JSON-RPC 2.0 stdio server in `packages/graphql-content-mapper`.
+  - Dynamically synthesizes virtual TypeScript definitions in memory during compilation.
+- **Next.js 16 (App Router + Turbopack / Webpack) Support**:
+  - Custom loaders enable `.graphql` files to be loaded directly as runtime modules in both Turbopack and Webpack.
+- **Full-Stack Type Safety**:
+  - **Server**: Code-first GraphQL schema with Pothos GraphQL, Prisma, and GraphQL Yoga.
+  - **Client**: Fully inferred queries and mutations via Urql (`useQuery`, `useMutation`).
 
 ---
 
-## 🛠 技術スタック
+## 🛠 Tech Stack
 
-| 分類 | 技術 / ライブラリ |
+| Category | Technology / Library |
 | :--- | :--- |
 | **Framework** | Next.js 16 (App Router, Turbopack) / React 19 |
 | **Language** | TypeScript 7.1.0-beta (Content Mappers, Native Engine) |
@@ -34,114 +34,81 @@ TypeScript 7.1 の新機能 **Content Mappers** を活用し、`graphql-codegen`
 
 ---
 
-## 📁 ディレクトリ構成
+## 📁 Directory Structure
 
 ```
 next-graphql/
 ├── graphql/
-│   ├── schema.graphql              # サーバー側からエクスポートされた GraphQL スキーマ
-│   └── query.graphql               # クライアント用 GraphQL オペレーション定義
+│   ├── schema.graphql              # Exported server GraphQL schema
+│   └── query.graphql               # Client GraphQL operation definitions
 ├── packages/
-│   └── graphql-content-mapper/     # TypeScript 7.1 コンテンツマッパー
+│   └── graphql-content-mapper/     # TypeScript 7.1 Content Mapper
 │       ├── src/
-│       │   ├── index.ts            # JSON-RPC 2.0 stdio ハンドラー（型解決用）
-│       │   └── loader.ts           # Next.js 実行時ローダー（Enum 展開対応）
-│       ├── package.json            # contentMapper マニフェスト定義
+│       │   ├── index.ts            # JSON-RPC 2.0 stdio handler (type resolution)
+│       │   └── loader.ts           # Next.js runtime loader (with Enum extraction)
+│       ├── package.json            # contentMapper manifest
 │       └── tsconfig.json
 ├── prisma/
-│   ├── schema.prisma               # Prisma データモデル定義
+│   ├── schema.prisma               # Prisma data models
 │   └── migrations/
 ├── src/
 │   ├── app/
-│   │   ├── Home.tsx                # query.graphql を直接インポートして実行するコンポーネント
-│   │   ├── category/page.tsx       # カテゴリ一覧・作成コンポーネント
-│   │   ├── explorer/               # Apollo Explorer によるクエリ確認画面
-│   │   ├── graphql/route.ts        # GraphQL Yoga エンドポイント (/graphql)
+│   │   ├── Home.tsx                # Component directly importing and executing query.graphql
+│   │   ├── category/page.tsx       # Category management component
+│   │   ├── explorer/               # Apollo Explorer playground
+│   │   ├── graphql/route.ts        # GraphQL Yoga route handler (/graphql)
 │   │   └── layout.tsx
 │   ├── lib/
-│   │   ├── client.ts               # Urql クライアント設定
-│   │   ├── prisma.ts               # Prisma クライアントインスタンス
-│   │   └── schema.ts               # Pothos による GraphQL スキーマ定義
+│   │   ├── client.ts               # Urql client setup
+│   │   ├── prisma.ts               # Prisma client singleton
+│   │   └── schema.ts               # Pothos GraphQL schema definitions
 │   └── generated/
-│       └── pothos-types.ts         # Pothos Prisma 連携用型定義
+│       └── pothos-types.ts         # Generated Pothos Prisma types
 ├── docker/
-│   └── docker-compose.yml          # PostgreSQL 開発環境
-├── next.config.js                  # Turbopack / Webpack ローダー設定
-├── tsconfig.json                   # contentMappers 設定
+│   └── docker-compose.yml          # PostgreSQL development container
+├── next.config.js                  # Turbopack / Webpack loader configuration
+├── tsconfig.json                   # contentMappers configuration
 └── package.json
 ```
 
 ---
 
-## 💡 アーキテクチャと仕組み
+## 💡 Architecture & How It Works
 
-### 1. TypeScript 7.1 Content Mapper による型解決の流れ
+### 1. Type Resolution with TypeScript 7.1 Content Mappers
 
 ```
-[クライアントコード (Home.tsx)]
+[Client Code (Home.tsx)]
        │ import { BooksDocument, OrderBy } from "../../graphql/query.graphql";
        ▼
 [tsc / Language Server] (TypeScript 7.1)
-       │ 未知の拡張子 .graphql を検出
-       │ JSON-RPC 2.0 (stdio) で transform 要求を送信
+       │ Detects unknown extension .graphql
+       │ Sends transform request over JSON-RPC 2.0 (stdio)
        ▼
 [packages/graphql-content-mapper]
-       │ 1. query.graphql の中身を AST 解析
-       │ 2. schema.graphql を元にメモリ上で型定義を合成
-       │ 3. TypedDocumentNode および Enum エクスポートを生成
+       │ 1. Parses query.graphql AST
+       │ 2. Synthesizes types in memory based on schema.graphql
+       │ 3. Generates TypedDocumentNode & Enum exports
        ▼
 [tsc / Language Server]
-       └ メモリ上で受け取った仮想の TypeScript 定義を使って型チェック・補完を実行
-         (※ ディスク上に中間ファイルは一切生成されません)
+       └ Performs type checking and autocomplete with virtual definitions
+         (No physical intermediate files written to disk)
 ```
 
-### 2. 実行時バンドラ連携（Next.js / Vite / その他）
+### 2. Runtime Bundler Integration (Next.js / Vite / Webpack)
 
-ブラウザ実行時には、バンドラに応じたアダプターが動作し、クエリ AST および Enum を純粋な ES Modules (`export const ...`) として提供します：
+At bundle and runtime, custom adapters provide the query AST and Enums as native ES Modules (`export const ...`):
 
-1. `graphql` の AST パーサーで各 Operation と必要な Fragment のみを抽出した DocumentNode を構築。
-2. `schema.graphql` 内の Enum 定義（`OrderBy: { Asc: "Asc", Desc: "Desc" }` 等）を自動抽出し、Named Export として付与。
-3. **Next.js (Turbopack / Webpack)**: `withGraphQLContentMapper` またはカスタムローダーにより、`.graphql` を直接インポート可能。
-4. **Vite**: `graphql-content-mapper/vite` プラグインにより、ネイティブ ESM / HMR（スキーマ変更監視を含む）に完全対応。
-
-#### 各環境の設定例
-
-- **Next.js (`next.config.js`)**:
-  ```js
-  const withGraphQL = require("graphql-content-mapper/next");
-  module.exports = withGraphQL({
-    // 通常の Next.js 設定
-  });
-  ```
-
-- **Vite (`vite.config.ts`)**:
-  ```ts
-  import { defineConfig } from "vite";
-  import graphql from "graphql-content-mapper/vite";
-
-  export default defineConfig({
-    plugins: [graphql()],
-  });
-  ```
-
-- **設定のカスタマイズ (`package.json`)**:
-  スキーマファイルの場所やカスタムスカラーをプロジェクトルートの `package.json` で指定可能：
-  ```json
-  {
-    "graphqlContentMapper": {
-      "schema": "graphql/schema.graphql",
-      "scalars": {
-        "DateTime": "string"
-      }
-    }
-  }
-  ```
+1. The GraphQL AST parser extracts required operations and referenced fragments into `DocumentNode` objects.
+2. Enum definitions from `schema.graphql` (e.g. `OrderBy: { Asc: "Asc", Desc: "Desc" }`) are extracted and exported as named constants.
+3. **Next.js (Turbopack / Webpack)**: `withGraphQLContentMapper` or custom loader rules load `.graphql` files directly.
+4. **Vite**: `graphql-content-mapper/vite` plugin provides native ESM support and HMR (including schema change watching).
 
 ---
 
-## 🚀 クライアント実装例
+## 🚀 Client Usage Example
 
-`graphql-codegen` の静的ファイルを介さず、`.graphql` から直接クエリと Enum を名前付きインポートして使用できます：
+Directly import queries and enums from `.graphql` files:
 
 ```tsx
 // src/app/Home.tsx
@@ -158,8 +125,8 @@ import {
 } from "../../graphql/query.graphql";
 
 export default function Home() {
-  // BooksDocument は TypedDocumentNode として解決され、
-  // data や variables の型が自動推論・検証される
+  // BooksDocument resolves as a TypedDocumentNode,
+  // automatically inferring data and variables types
   const [{ data, fetching }] = useQuery({
     query: BooksDocument,
     variables: {
@@ -175,44 +142,44 @@ export default function Home() {
 
 ---
 
-## 🏁 セットアップと起動手順
+## 🏁 Getting Started
 
-### 1. 依存関係のインストール
+### 1. Install Dependencies
 ```bash
 pnpm install
 ```
 
-### 2. 開発用データベース (PostgreSQL) の起動
+### 2. Start PostgreSQL Database
 ```bash
 pnpm run dev:docker
 ```
 
-### 3. Prisma マイグレーションとクライアント生成
+### 3. Run Prisma Migrations & Generate Client
 ```bash
 pnpm run prisma:migrate
 ```
 
-### 4. 型チェック
+### 4. Run Type Checking
 ```bash
 pnpm run typecheck
 ```
-> `build:mapper` でコンテンツマッパーがコンパイルされた後、`tsc --runExternalCode --noEmit` で型チェックが実行されます。
+> Builds the content mapper and executes `tsc --runExternalCode --noEmit`.
 
-### 5. 開発サーバーの起動
+### 5. Start Development Server
 ```bash
 pnpm run dev:next
 ```
-ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 💻 VS Code エディタの設定
+## 💻 VS Code Configuration
 
-TypeScript 7.1 はネイティブバイナリ（`tsc.exe`）および LSP アーキテクチャに刷新されているため、エディタ上で Content Mapper を利用するには以下の設定を行います：
+TypeScript 7.1 adopts a new native binary engine (`tsc.exe`) and updated LSP architecture. To use Content Mappers in VS Code:
 
-1. **拡張機能のインストール**
-   - Microsoft 公式のプレビュー拡張機能 **`TypeScript 7`**（ID: `TypeScriptTeam.native-preview`）をインストールします。
-2. **`.vscode/settings.json` の設定**
+1. **Install the Extension**
+   - Install the official Microsoft preview extension: **`TypeScript 7`** (ID: `TypeScriptTeam.native-preview`).
+2. **Configure `.vscode/settings.json`**
    ```json
    {
      "js/ts.tsdk.path": "node_modules/typescript",
@@ -222,21 +189,21 @@ TypeScript 7.1 はネイティブバイナリ（`tsc.exe`）および LSP アー
      "js/ts.contentMappers.enabled": true
    }
    ```
-3. **バージョンの切り替え**
-   - ステータスバーの **`TypeScript Language Server`** をクリック。
-   - `Select Version...` から **`Use Custom Version` (7.1.0-beta - node_modules/typescript)** を選択します。
+3. **Select TypeScript Version**
+   - Click **`TypeScript Language Server`** in the status bar.
+   - Choose `Select Version...` -> **`Use Custom Version` (7.1.0-beta - node_modules/typescript)**.
 
 ---
 
-## 📜 利用可能なスクリプト一覧
+## 📜 Available Scripts
 
-| コマンド | 説明 |
+| Command | Description |
 | :--- | :--- |
-| `pnpm run dev:next` | Next.js 開発サーバーを起動 (Turbopack) |
-| `pnpm run dev:docker` | Docker Compose で PostgreSQL コンテナを起動 |
-| `pnpm run build:mapper` | `packages/graphql-content-mapper` を TypeScript コンパイル |
-| `pnpm run typecheck` | コンテンツマッパーをビルドし、`tsc --runExternalCode --noEmit` を実行 |
-| `pnpm run build` | Prisma 生成 ＋ 型チェック ＋ Next.js 本番ビルドを実行 |
-| `pnpm run prisma:migrate` | Prisma スキーマをフォーマットしマイグレーションを適用 |
-| `pnpm run prisma:generate` | Prisma Client および Pothos 型定義を再生成 |
-| `pnpm run lint` | ESLint によるコード検証と自動修正 |
+| `pnpm run dev:next` | Start Next.js dev server (Turbopack) |
+| `pnpm run dev:docker` | Start PostgreSQL container via Docker Compose |
+| `pnpm run build:mapper` | Compile `packages/graphql-content-mapper` |
+| `pnpm run typecheck` | Build content mapper and run `tsc --runExternalCode --noEmit` |
+| `pnpm run build` | Prisma generate + typecheck + Next.js production build |
+| `pnpm run prisma:migrate` | Format and run Prisma migrations |
+| `pnpm run prisma:generate` | Regenerate Prisma client & Pothos types |
+| `pnpm run lint` | Run ESLint checks and fixes |
