@@ -1,0 +1,86 @@
+name: Release and Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "packages/graphql-content-mapper/package.json"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write    # For creating git tags and GitHub Releases
+  id-token: write    # For npm OIDC Trusted Publishing & Provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and Test
+        run: |
+          pnpm build
+          pnpm test
+
+      - name: Check if tag exists
+        id: check_version
+        run: |
+          VERSION=$(node -p "require('./packages/graphql-content-mapper/package.json').version")
+          TAG="v$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Skipping release."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "New version detected: $VERSION (Tag: $TAG)"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Git
+        if: steps.check_version.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create Git Tag and GitHub Release
+        if: steps.check_version.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.check_version.outputs.tag }}
+          VERSION: ${{ steps.check_version.outputs.version }}
+        run: |
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" --title "$TAG" --generate-notes
+
+      - name: Publish to npm (OIDC Trusted Publishing)
+        if: steps.check_version.outputs.exists == 'false'
+        working-directory: packages/graphql-content-mapper
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          pnpm publish --access public --provenance --no-git-checks
