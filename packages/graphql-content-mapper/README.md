@@ -321,6 +321,7 @@ export function useBooks() {
 You can also import types and document AST directly without any client library:
 
 ```ts
+import { print } from "graphql";
 import {
   FindBooks,
   type FindBooksQuery,
@@ -337,7 +338,7 @@ export async function fetchBooks() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      query: FindBooks.loc?.source.body,
+      query: print(FindBooks),
       variables,
     }),
   });
