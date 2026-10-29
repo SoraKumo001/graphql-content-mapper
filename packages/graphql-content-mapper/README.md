@@ -190,46 +190,49 @@ module.exports = {
 
 ---
 
-## 💻 Usage Example
+## 💻 Usage Examples
 
-### 1. Define GraphQL Operations
+The generated `TypedDocumentNode` conforms to the GraphQL industry standard, making it compatible with **urql**, **Apollo Client**, **graphql-request**, **TanStack Query**, and native **fetch** without additional configuration.
+
+### 1. Define GraphQL Operations & Fragments
 
 ```graphql
 # graphql/query.graphql
+fragment BookFields on Book {
+  id
+  title
+  createdAt
+}
+
 query FindBooks($order: OrderBy) {
   books(orderBy: $order) {
-    id
-    title
-    createdAt
+    ...BookFields
   }
 }
 
 mutation CreateBook($title: String!) {
   createBook(title: $title) {
-    id
-    title
+    ...BookFields
   }
 }
 ```
 
-### 2. Import into TypeScript / React Components
+### 2. Client Integrations
 
-Directly import named exports from `.graphql` files with complete type safety without generating static `.ts` files:
+#### urql (React)
 
 ```tsx
-import { useQuery, useMutation } from "urql"; // or @apollo/client
+import { useQuery, useMutation } from "urql";
 import {
   FindBooks,      // TypedDocumentNode<FindBooksQuery, FindBooksQueryVariables>
   CreateBook,     // TypedDocumentNode<CreateBookMutation, CreateBookMutationVariables>
-  OrderBy,        // Enum (e.g. { Asc: "Asc", Desc: "Desc" })
+  OrderBy,        // Enum value and type
 } from "../graphql/query.graphql";
 
 export function BookList() {
   const [{ data, fetching }] = useQuery({
     query: FindBooks,
-    variables: {
-      order: OrderBy.Asc, // Fully type-safe
-    },
+    variables: { order: OrderBy.Asc }, // Fully type-safe
   });
 
   const [, createBook] = useMutation(CreateBook);
@@ -243,6 +246,104 @@ export function BookList() {
       ))}
     </ul>
   );
+}
+```
+
+#### Apollo Client (`@apollo/client`)
+
+```tsx
+import { useQuery, useMutation } from "@apollo/client";
+import {
+  FindBooks,
+  CreateBook,
+  OrderBy,
+} from "../graphql/query.graphql";
+
+export function BookList() {
+  const { data, loading } = useQuery(FindBooks, {
+    variables: { order: OrderBy.Asc },
+  });
+
+  const [createBook] = useMutation(CreateBook);
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <ul>
+      {data?.books.map((b) => (
+        <li key={b.id}>{b.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+#### graphql-request (Next.js Server Components / Node.js)
+
+`graphql-request` automatically infers both query variables and response types from `TypedDocumentNode`:
+
+```ts
+import { request } from "graphql-request";
+import { FindBooks, OrderBy } from "./query.graphql";
+
+const ENDPOINT = "https://example.com/graphql";
+
+// 'data' is strongly typed as FindBooksQuery
+export async function getBooks() {
+  const data = await request(ENDPOINT, FindBooks, {
+    order: OrderBy.Asc,
+  });
+
+  return data.books;
+}
+```
+
+#### TanStack Query (React Query) + graphql-request
+
+```tsx
+import { useQuery } from "@tanstack/react-query";
+import { request } from "graphql-request";
+import { FindBooks, OrderBy } from "../graphql/query.graphql";
+
+export function useBooks() {
+  return useQuery({
+    queryKey: ["books", OrderBy.Asc],
+    queryFn: () =>
+      request("/api/graphql", FindBooks, {
+        order: OrderBy.Asc,
+      }),
+  });
+}
+```
+
+#### Native `fetch` (Next.js Server Actions / Route Handlers)
+
+You can also import types and document AST directly without any client library:
+
+```ts
+import {
+  FindBooks,
+  type FindBooksQuery,
+  type FindBooksQueryVariables,
+  OrderBy,
+} from "./query.graphql";
+
+export async function fetchBooks() {
+  const variables: FindBooksQueryVariables = {
+    order: OrderBy.Desc,
+  };
+
+  const response = await fetch("https://example.com/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query: FindBooks.loc?.source.body,
+      variables,
+    }),
+  });
+
+  const { data } = (await response.json()) as { data: FindBooksQuery };
+  return data.books;
 }
 ```
 
